@@ -1,30 +1,33 @@
-async function sendMessage(){
+async function sendMessage() {
 
-const input=document.getElementById("input");
-const chat=document.getElementById("chat-box");
+  const input = document.getElementById("input");
+  const chat = document.getElementById("chat-box");
 
-const message=input.value;
+  const message = input.value.trim();
 
-if(!message) return;
+  if (!message) return;
 
-chat.innerHTML+=`<div class="user"><b>You:</b> ${message}</div>`;
+  chat.innerHTML += `<div class="user"><b>You:</b> ${message}</div>`;
+  input.value = "";
 
-input.value="";
+  try {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: message
+      })
+    });
 
-const res=await fetch("/api/chat",{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-message:message
-})
-});
+    const data = await res.json();
 
-const data=await res.json();
+    chat.innerHTML += `<div class="ai"><b>AuraAI:</b> ${data.reply || data.error}</div>`;
 
-chat.innerHTML+=`<div class="ai"><b>AuraAI:</b> ${data.reply}</div>`;
+  } catch (err) {
+    chat.innerHTML += `<div class="ai"><b>AuraAI:</b> Failed to connect.</div>`;
+  }
 
-chat.scrollTop=chat.scrollHeight;
-
+  chat.scrollTop = chat.scrollHeight;
 }
